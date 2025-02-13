@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.SlideSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.PickupSubsystem;
 
 @TeleOp
-public class FieldCentricDrive extends LinearOpMode {
+public class TestSystems extends LinearOpMode {
     // Variables
     private DcMotor rearRight;
     private DcMotor rearLeft;
@@ -28,10 +28,6 @@ public class FieldCentricDrive extends LinearOpMode {
     private double targetSlidePosition;
     private double targetFloorSlidePosition;
     private double fieldOffset;
-    private int presetCycle = 0;
-    private double lastPresetCycle = 0;
-    private boolean lastDpadDownState = false;
-    private boolean lastDpadUpState = false;
 
     @Override
     public void runOpMode() {
@@ -56,7 +52,7 @@ public class FieldCentricDrive extends LinearOpMode {
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         imu.initialize(parameters);
-        
+
         GrippySubsystem grippySubsystem = new GrippySubsystem(slideServo);
         FloorGrippySubsystem floorGrippySubsystem = new FloorGrippySubsystem(floorServo);
         SlideSubsystem slideSubsystem = new SlideSubsystem(slideMotor);
@@ -91,67 +87,27 @@ public class FieldCentricDrive extends LinearOpMode {
                 rx = 0;
             }
 
-            boolean isSlideBeingControlled = (scu || scd);
-
-            if (gamepad1.dpad_up) {presetCycle += 1;}
-            if (gamepad1.dpad_down) {presetCycle -= 1;}
-            if (presetCycle < 1) {presetCycle = 1;}
-            if (presetCycle > 4) {presetCycle = 4;}
-
             if (scu) {targetSlidePosition += 1;}
             if (scd) {targetSlidePosition -= 1;}
 
             if (gamepad1.right_trigger > 0.1) {targetFloorSlidePosition += 1;}
             if (gamepad1.left_trigger > 0.1) {targetFloorSlidePosition -= 1;}
 
-            lastDpadUpState = gamepad1.dpad_up;
-            lastDpadDownState = gamepad1.dpad_down;
-
-            // Presets
-            if (presetCycle != lastPresetCycle && !isSlideBeingControlled) {
-                switch (presetCycle) {
-                    case 1:
-                        targetSlidePosition = -3;
-                        break;
-                    case 2:
-                        targetSlidePosition = -775;
-                        break;
-                    case 3:
-                        targetSlidePosition = -1815;
-                        break;
-                    case 4:
-                        targetSlidePosition = -3350;
-                        break;
-                    default:
-                        telemetry.addData("preset", "none selected");
-                        telemetry.update();
-                        break;
-                }
-                slideSubsystem.setTargetPosition(targetSlidePosition);
-                lastPresetCycle = presetCycle;
-            }
-
             // Main logic
             if (gamepad1.a) {
                 grippySubsystem.setServoPosition(0);
             } else if (gamepad1.b) {
                 grippySubsystem.setServoPosition(-45);
-            }
+            } else if (gamepad1.left_stick_button) {grippySubsystem.setServoPosition(0);}
 
             if (gamepad1.x) {
                 floorGrippySubsystem.setServoPosition(0);
             } else if (gamepad1.y) {
                 floorGrippySubsystem.setServoPosition(-45);
-            }
+            } else if (gamepad1.left_stick_button) {grippySubsystem.setServoPosition(0);}
 
-            // Logic to save the slide from cooking itself
-            if (targetSlidePosition > -3) {targetSlidePosition = -4;}
-            if (targetSlidePosition < -3800) {targetSlidePosition = -3790;}
             if (slideSubsystem.getSlideAmps() > 5) {slideSubsystem.setSlidePower(0);}
 
-            // Logic to save the floor slide from cooking itself
-            if (targetFloorSlidePosition > -3) {targetFloorSlidePosition = -4;}
-            if (targetFloorSlidePosition < -3800) {targetFloorSlidePosition = -3790;}
             if (pickupSubsystem.getSlideAmps() > 5) {pickupSubsystem.setFloorSlidePower(0);}
 
             slideSubsystem.setTargetPosition(targetSlidePosition);

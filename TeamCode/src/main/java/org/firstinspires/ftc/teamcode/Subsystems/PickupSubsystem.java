@@ -8,30 +8,30 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-public class SlideSubsystem extends SubsystemBase {
+public class PickupSubsystem extends SubsystemBase {
 
-    private DcMotorEx slide;
+    private DcMotorEx floorSlide;
     private double targetPosition;
     private double currentPosition;
     private final ElapsedTime runtime = new ElapsedTime();
 
     private double previousError = 0, integral = 0;
 
-    public SlideSubsystem(DcMotorEx slide) {
-        this.slide = slide;
-        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    public PickupSubsystem(DcMotorEx slide) {
+        this.floorSlide = floorSlide;
+        floorSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         this.targetPosition = 0;
         this.currentPosition = 0;
     }
 
-    public SlideSubsystem() {
+    public PickupSubsystem() {
     }
 
 
     public void resetEncoder() {
-        slide.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        slide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        currentPosition = slide.getCurrentPosition();
+        floorSlide.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        floorSlide.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        currentPosition = floorSlide.getCurrentPosition();
         targetPosition = currentPosition;
     }
 
@@ -45,7 +45,7 @@ public class SlideSubsystem extends SubsystemBase {
         double kD = 0.0;
         double power = (kP * error) + (kI * integral) + (kD * derivative);
 
-        slide.setPower(power);
+        floorSlide.setPower(power);
         previousError = error;
     }
 
@@ -54,23 +54,23 @@ public class SlideSubsystem extends SubsystemBase {
     }
 
     public double getCurrentPosition() {
-        return slide.getCurrentPosition();
+        return floorSlide.getCurrentPosition();
     }
 
     public double getTargetPosition() {
         return targetPosition;
     }
 
-    public void setSlidePower(double power) {
-        slide.setPower(power);
+    public void setFloorSlidePower(double power) {
+        floorSlide.setPower(power);
     }
 
     public double getSlideAmps() {
-        return slide.getCurrent(CurrentUnit.AMPS);
+        return floorSlide.getCurrent(CurrentUnit.AMPS);
     }
 
     public void update() {
-        currentPosition = slide.getCurrentPosition();
+        currentPosition = floorSlide.getCurrentPosition();
         updatePIDControl();
     }
 
@@ -79,7 +79,7 @@ public class SlideSubsystem extends SubsystemBase {
         while (Math.abs(autoTargetPosition - getCurrentPosition()) > 5){
             update();
         }
-        slide.setPower(0);
+        floorSlide.setPower(0);
     }
 
     public double getSlideError() {
